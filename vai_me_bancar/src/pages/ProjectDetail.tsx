@@ -55,19 +55,40 @@ interface Donation {
     cellphone: string;
     asaas_cliente_id: string;
     asaas_cobranca_id: string;
+    donation_type: string;
+    donation_message: string;
     created_at: string;
     updated_at: string;
 }
 
-interface ProjectDonatesResponse {
+interface FundraisingStats {
+    help_amount: number;
+    stop_amount: number;
+    total_amount: number;
+    help_percentage: number;
+    stop_percentage: number;
+    stop_wins: boolean;
+    troll_message: string;
+    help_count: number;
+    stop_count: number;
+}
+
+interface ProjectInfoResponse {
     project: Project;
-    donates: Donation[];
+    progress_percentage: number;
+    time_remaining: string;
+    is_goal_reached: boolean;
+    daily_ranking: Donation[];
+    top_donor_today: Donation;
+    lowest_donor_today: Donation;
+    fundraising_stats: FundraisingStats;
 }
 
 export default function ProjectDetail() {
     const { projectId } = useParams<{ projectId: string }>();
     const [project, setProject] = useState<Project | null>(null);
     const [donations, setDonations] = useState<Donation[]>([]);
+    const [projectInfo, setProjectInfo] = useState<ProjectInfoResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -80,32 +101,19 @@ export default function ProjectDetail() {
                 setLoading(true);
                 setError(null);
 
-                // Buscar projeto
-                const projectResponse = await fetch(`https://vaimebancar.codegus.com/api/projects/${projectId}`);
-                if (!projectResponse.ok) {
+                // Buscar informações completas do projeto
+                const response = await fetch(`https://vaimebancar.codegus.com/api/projects/${projectId}/info`);
+                if (!response.ok) {
                     throw new Error('Projeto não encontrado');
                 }
-                const projectData = await projectResponse.json();
-                setProject(projectData);
 
-                // Buscar doações do projeto
-                const donationsResponse = await fetch(`https://vaimebancar.codegus.com/api/projects/${projectId}/donates`);
-                if (donationsResponse.ok) {
-                    const responseData: ProjectDonatesResponse = await donationsResponse.json();
-                    console.log('Project donates data received:', responseData);
-                    
-                    // Usar os dados do projeto da resposta (mais atualizados)
-                    if (responseData.project) {
-                        setProject(responseData.project);
-                    }
-                    
-                    // Usar as doações da resposta
-                    const donationsArray = Array.isArray(responseData.donates) ? responseData.donates : [];
-                    setDonations(donationsArray);
+                const data: ProjectInfoResponse = await response.json();
+                console.log('Project info data received:', data);
 
-                    // Como as doações já têm status, não precisamos buscar separadamente
-                    // Removido setPayments([]) pois não usamos mais payments
-                }
+                // Armazenar todas as informações
+                setProjectInfo(data);
+                setProject(data.project);
+                setDonations(data.daily_ranking);
 
             } catch (error) {
                 console.error('Erro ao buscar dados do projeto:', error);
@@ -225,7 +233,9 @@ export default function ProjectDetail() {
         );
     }
 
-    const totalDonations = donations.reduce((sum, donation) => sum + donation.amount, 0);
+    const totalDonations = projectInfo ? projectInfo.fundraising_stats.total_amount : donations.reduce((sum, donation) => sum + donation.amount, 0);
+    const helpAmount = projectInfo ? projectInfo.fundraising_stats.help_amount : 0;
+    const stopAmount = projectInfo ? projectInfo.fundraising_stats.stop_amount : 0;
 
     return (
         <Container size="lg" py="xl">
@@ -289,15 +299,58 @@ export default function ProjectDetail() {
                             </Grid.Col>
                         </Grid>
 
+                        {/* Estatísticas de Fundraising */}
+                        {projectInfo && (
+                            <Paper radius="md" p="md" bg="gray.0">
+                                <Title order={3} mb="md">Estatísticas de Arrecadação</Title>
+                                <Grid>
+                                    <Grid.Col span={{ base: 12, sm: 6 }}>
+                                        <Stack gap="xs">
+                                            <Text size="sm" c="dimmed">Ajuda (Help)</Text>
+                                            <Text fw={600} c="green">
+                                                {formatCurrency(helpAmount)} ({projectInfo.fundraising_stats.help_percentage.toFixed(1)}%)
+                                            </Text>
+                                            <Text size="xs" c="dimmed">
+                                                {projectInfo.fundraising_stats.help_count} doações
+                                            </Text>
+                                        </Stack>
+                                    </Grid.Col>
+                                    <Grid.Col span={{ base: 12, sm: 6 }}>
+                                        <Stack gap="xs">
+                                            <Text size="sm" c="dimmed">Parar (Stop)</Text>
+                                            <Text fw={600} c="red">
+                                                {formatCurrency(stopAmount)} ({projectInfo.fundraising_stats.stop_percentage.toFixed(1)}%)
+                                            </Text>
+                                            <Text size="xs" c="dimmed">
+                                                {projectInfo.fundraising_stats.stop_count} doações
+                                            </Text>
+                                        </Stack>
+                                    </Grid.Col>
+                                </Grid>
+
+                                {projectInfo.fundraising_stats.stop_wins && (
+                                    <Alert
+                                        icon={<IconAlertCircle size={16} />}
+                                        title="Para logo esse projeto!"
+                                        color="red"
+                                        variant="light"
+                                        mt="md"
+                                    >
+                                        {projectInfo.fundraising_stats.troll_message}
+                                    </Alert>
+                                )}
+                            </Paper>
+                        )}
+
                         <Box>
                             <Group justify="space-between" mb="xs">
                                 <Text size="sm" fw={500}>Progresso</Text>
                                 <Text size="sm" c="dimmed">
-                                    {calculateProgress(totalDonations, project.budget).toFixed(1)}%
+                                    {projectInfo ? `${projectInfo.progress_percentage.toFixed(1)}%` : `${calculateProgress(totalDonations, project.budget).toFixed(1)}%`}
                                 </Text>
                             </Group>
                             <Progress
-                                value={calculateProgress(totalDonations, project.budget)}
+                                value={projectInfo ? projectInfo.progress_percentage : calculateProgress(totalDonations, project.budget)}
                                 size="lg"
                                 radius="md"
                                 color="green"
@@ -324,8 +377,93 @@ export default function ProjectDetail() {
                                 </Group>
                             </Grid.Col>
                         </Grid>
+
+                        {projectInfo && (
+                            <Alert
+                                icon={<IconCalendar size={16} />}
+                                title="Tempo Restante"
+                                color="blue"
+                                variant="light"
+                            >
+                                {projectInfo.time_remaining}
+                                {projectInfo.is_goal_reached && (
+                                    <Text fw={600} c="green" mt="xs">
+                                        🎉 Meta alcançada!
+                                    </Text>
+                                )}
+                            </Alert>
+                        )}
                     </Stack>
                 </Paper>
+
+                {/* Destaques do Dia */}
+                {projectInfo && (projectInfo.top_donor_today || projectInfo.lowest_donor_today) && (
+                    <Paper radius="md" p="xl" withBorder>
+                        <Stack gap="lg">
+                            <Title order={2}>Destaques do Dia</Title>
+
+                            <Grid>
+                                {projectInfo.top_donor_today && (
+                                    <Grid.Col span={{ base: 12, sm: 6 }}>
+                                        <Card shadow="sm" padding="lg" radius="md" withBorder bg="green.0">
+                                            <Stack gap="sm">
+                                                <Group gap="sm">
+                                                    <IconHeart size={20} color="var(--mantine-color-green-6)" />
+                                                    <Text fw={600} c="green">Maior Doador do Dia</Text>
+                                                </Group>
+                                                <Text fw={500}>{projectInfo.top_donor_today.donor_name}</Text>
+                                                <Text size="xl" fw={700} c="green">
+                                                    {formatCurrency(projectInfo.top_donor_today.amount)}
+                                                </Text>
+                                                <Badge
+                                                    color={projectInfo.top_donor_today.donation_type === 'help' ? 'green' : 'red'}
+                                                    variant="light"
+                                                    size="sm"
+                                                >
+                                                    {projectInfo.top_donor_today.donation_type === 'help' ? 'Ajuda' : 'Parar'}
+                                                </Badge>
+                                                {projectInfo.top_donor_today.donation_message && (
+                                                    <Text size="sm" c="dimmed" fs="italic">
+                                                        "{projectInfo.top_donor_today.donation_message}"
+                                                    </Text>
+                                                )}
+                                            </Stack>
+                                        </Card>
+                                    </Grid.Col>
+                                )}
+
+                                {projectInfo.lowest_donor_today && (
+                                    <Grid.Col span={{ base: 12, sm: 6 }}>
+                                        <Card shadow="sm" padding="lg" radius="md" withBorder bg="blue.0">
+                                            <Stack gap="sm">
+                                                <Group gap="sm">
+                                                    <IconHeart size={20} color="var(--mantine-color-blue-6)" />
+                                                    <Text fw={600} c="blue">Menor Doador do Dia</Text>
+                                                </Group>
+                                                <Text fw={500}>{projectInfo.lowest_donor_today.donor_name}</Text>
+                                                <Text size="xl" fw={700} c="blue">
+                                                    {formatCurrency(projectInfo.lowest_donor_today.amount)}
+                                                </Text>
+                                                <Badge
+                                                    color={projectInfo.lowest_donor_today.donation_type === 'help' ? 'green' : 'red'}
+                                                    variant="light"
+                                                    size="sm"
+                                                >
+                                                    {projectInfo.lowest_donor_today.donation_type === 'help' ? 'Ajuda' : 'Parar'}
+                                                </Badge>
+                                                {projectInfo.lowest_donor_today.donation_message && (
+                                                    <Text size="sm" c="dimmed" fs="italic">
+                                                        "{projectInfo.lowest_donor_today.donation_message}"
+                                                    </Text>
+                                                )}
+                                            </Stack>
+                                        </Card>
+                                    </Grid.Col>
+                                )}
+                            </Grid>
+                        </Stack>
+                    </Paper>
+                )}
 
                 {/* Lista de Doações */}
                 <Paper radius="md" p="xl" withBorder>
@@ -382,6 +520,32 @@ export default function ProjectDetail() {
                                                     <Text fw={500}>
                                                         {formatDate(donation.created_at)}
                                                     </Text>
+                                                </Grid.Col>
+                                            </Grid>
+
+                                            <Grid>
+                                                <Grid.Col span={{ base: 12, sm: 6 }}>
+                                                    <Group gap="xs">
+                                                        <Text size="sm" c="dimmed">Tipo</Text>
+                                                    </Group>
+                                                    <Badge
+                                                        color={donation.donation_type === 'help' ? 'green' : 'red'}
+                                                        variant="light"
+                                                    >
+                                                        {donation.donation_type === 'help' ? 'Ajuda' : 'Parar'}
+                                                    </Badge>
+                                                </Grid.Col>
+                                                <Grid.Col span={{ base: 12, sm: 6 }}>
+                                                    {donation.donation_message && (
+                                                        <Group gap="xs">
+                                                            <Text size="sm" c="dimmed">Mensagem</Text>
+                                                        </Group>
+                                                    )}
+                                                    {donation.donation_message && (
+                                                        <Text size="sm" fw={500} c="dimmed">
+                                                            "{donation.donation_message}"
+                                                        </Text>
+                                                    )}
                                                 </Grid.Col>
                                             </Grid>
                                         </Card>
