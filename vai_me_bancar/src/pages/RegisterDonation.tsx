@@ -162,218 +162,216 @@ export default function RegisterDonation() {
 
 
     return (
-        <Container size="sm" py="xl">
-            <Stack gap="lg">
-                <Paper radius="md" p="xl" withBorder>
-                    <Stack gap="lg">
-                        <Group gap="sm">
-                            <IconHeart size={32} color="var(--mantine-color-red-6)" />
-                            <div>
-                                <Title order={1}>Fazer Doação</Title>
-                                <Text c="dimmed">Contribua para um projeto e faça a diferença!</Text>
-                            </div>
-                        </Group>
+        <Stack gap="lg">
+            <Paper radius="md" p="xl" withBorder>
+                <Stack gap="lg">
+                    <Group gap="sm">
+                        <IconHeart size={32} color="var(--mantine-color-red-6)" />
+                        <div>
+                            <Title order={1}>Fazer Doação</Title>
+                            <Text c="dimmed">Contribua para um projeto e faça a diferença!</Text>
+                        </div>
+                    </Group>
 
-                        {success && boletoData && (
-                            <Alert
-                                icon={<IconCheck size={16} />}
-                                title="Boleto Gerado com Sucesso!"
-                                color="green"
-                                variant="light"
-                            >
-                                <Stack gap="sm">
-                                    <Text>
-                                        Seu boleto foi gerado com sucesso! 
-                                        Valor: <strong>R$ {boletoData.amount.toFixed(2)}</strong>
-                                    </Text>
-                                    <Text size="sm" c="dimmed">
-                                        Vencimento: {new Date(boletoData.dueDate).toLocaleDateString('pt-BR')}
-                                    </Text>
-                                    <Button
-                                        component="a"
-                                        href={boletoData.boletoUrl}
-                                        target="_blank"
-                                        leftSection={<IconDownload size={16} />}
-                                        color="green"
-                                        variant="filled"
-                                        fullWidth
-                                    >
-                                        Baixar Boleto
-                                    </Button>
-                                </Stack>
-                            </Alert>
-                        )}
-
+                    {success && boletoData && (
                         <Alert
-                            icon={<IconInfoCircle size={16} />}
-                            title="Informações Importantes"
-                            color="blue"
+                            icon={<IconCheck size={16} />}
+                            title="Boleto Gerado com Sucesso!"
+                            color="green"
                             variant="light"
                         >
-                            Após preencher os dados, será gerado um boleto bancário para pagamento.
-                            O valor será transferido para o projeto após a confirmação do pagamento.
-                        </Alert>
-
-                        <form onSubmit={form.onSubmit(handleSubmit)}>
-                            <Stack gap="md">
-                                {/* Informações Básicas */}
-                                <Title order={3}>Informações da Doação</Title>
-                                
-                                <NumberInput
-                                    withAsterisk
-                                    label="Valor da Doação"
-                                    placeholder="100.00"
-                                    min={0.01}
-                                    step={0.01}
-                                    decimalScale={2}
-                                    leftSection="R$"
-                                    key={form.key('amount')}
-                                    {...form.getInputProps('amount')}
-                                />
-
-                                <Select
-                                    withAsterisk
-                                    label="Projeto"
-                                    placeholder="Selecione um projeto"
-                                    data={projects}
-                                    searchable
-                                    key={form.key('project_id')}
-                                    {...form.getInputProps('project_id')}
-                                />
-
-                                <Select
-                                    withAsterisk
-                                    label="Tipo de Doação"
-                                    placeholder="Selecione o tipo"
-                                    data={[
-                                        { value: 'help', label: 'Ajuda' },
-                                        { value: 'stop', label: 'Parar' }
-                                    ]}
-                                    key={form.key('donation_type')}
-                                    {...form.getInputProps('donation_type')}
-                                />
-
-                                <Divider my="md" />
-
-                                {/* Dados Pessoais */}
-                                <Title order={3}>Dados Pessoais</Title>
-                                
-                                <TextInput
-                                    withAsterisk
-                                    label="Nome Completo"
-                                    placeholder="Maria Santos"
-                                    key={form.key('donor_name')}
-                                    {...form.getInputProps('donor_name')}
-                                />
-
-                                <TextInput
-                                    withAsterisk
-                                    label="CPF"
-                                    placeholder="000.000.000-00"
-                                    key={form.key('cpf')}
-                                    {...form.getInputProps('cpf')}
-                                />
-
-                                <TextInput
-                                    withAsterisk
-                                    label="Email"
-                                    placeholder="maria@email.com"
-                                    type="email"
-                                    key={form.key('email')}
-                                    {...form.getInputProps('email')}
-                                />
-
-                                <TextInput
-                                    withAsterisk
-                                    label="Telefone"
-                                    placeholder="11999999999"
-                                    key={form.key('cellphone')}
-                                    {...form.getInputProps('cellphone')}
-                                />
-
-                                <Divider my="md" />
-
-                                {/* Endereço */}
-                                <Group gap="sm">
-                                    <IconMapPin size={20} color="var(--mantine-color-blue-6)" />
-                                    <Title order={3}>Endereço</Title>
-                                </Group>
-                                
-                                <Group grow>
-                                    <TextInput
-                                        withAsterisk
-                                        label="CEP"
-                                        placeholder="00000-000"
-                                        key={form.key('postal_code')}
-                                        {...form.getInputProps('postal_code')}
-                                    />
-                                    <TextInput
-                                        withAsterisk
-                                        label="Estado"
-                                        placeholder="SP"
-                                        maxLength={2}
-                                        key={form.key('state')}
-                                        {...form.getInputProps('state')}
-                                    />
-                                </Group>
-
-                                <TextInput
-                                    withAsterisk
-                                    label="Cidade"
-                                    placeholder="São Paulo"
-                                    key={form.key('city')}
-                                    {...form.getInputProps('city')}
-                                />
-
-                                <Group grow>
-                                    <TextInput
-                                        withAsterisk
-                                        label="Endereço"
-                                        placeholder="Rua das Flores"
-                                        key={form.key('address')}
-                                        {...form.getInputProps('address')}
-                                    />
-                                    <TextInput
-                                        withAsterisk
-                                        label="Número"
-                                        placeholder="123"
-                                        key={form.key('number')}
-                                        {...form.getInputProps('number')}
-                                    />
-                                </Group>
-
-                                <Group grow>
-                                    <TextInput
-                                        label="Complemento"
-                                        placeholder="Apto 45"
-                                        key={form.key('complement')}
-                                        {...form.getInputProps('complement')}
-                                    />
-                                    <TextInput
-                                        withAsterisk
-                                        label="Bairro"
-                                        placeholder="Centro"
-                                        key={form.key('neighborhood')}
-                                        {...form.getInputProps('neighborhood')}
-                                    />
-                                </Group>
-
-                                <Group justify="flex-end" mt="md">
-                                    <Button 
-                                        type="submit" 
-                                        loading={loading} 
-                                        disabled={loading}
-                                        leftSection={<IconHeart size={16} />}
-                                        size="md"
-                                    >
-                                        {loading ? 'Gerando Boleto...' : 'Gerar Boleto'}
-                                    </Button>
-                                </Group>
+                            <Stack gap="sm">
+                                <Text>
+                                    Seu boleto foi gerado com sucesso! 
+                                    Valor: <strong>R$ {boletoData.amount.toFixed(2)}</strong>
+                                </Text>
+                                <Text size="sm" c="dimmed">
+                                    Vencimento: {new Date(boletoData.dueDate).toLocaleDateString('pt-BR')}
+                                </Text>
+                                <Button
+                                    component="a"
+                                    href={boletoData.boletoUrl}
+                                    target="_blank"
+                                    leftSection={<IconDownload size={16} />}
+                                    color="green"
+                                    variant="filled"
+                                    fullWidth
+                                >
+                                    Baixar Boleto
+                                </Button>
                             </Stack>
-                        </form>
-                    </Stack>
-                </Paper>
-            </Stack>
-        </Container>
+                        </Alert>
+                    )}
+
+                    <Alert
+                        icon={<IconInfoCircle size={16} />}
+                        title="Informações Importantes"
+                        color="blue"
+                        variant="light"
+                    >
+                        Após preencher os dados, será gerado um boleto bancário para pagamento.
+                        O valor será transferido para o projeto após a confirmação do pagamento.
+                    </Alert>
+
+                    <form onSubmit={form.onSubmit(handleSubmit)}>
+                        <Stack gap="md">
+                            {/* Informações Básicas */}
+                            <Title order={3}>Informações da Doação</Title>
+                            
+                            <NumberInput
+                                withAsterisk
+                                label="Valor da Doação"
+                                placeholder="100.00"
+                                min={0.01}
+                                step={0.01}
+                                decimalScale={2}
+                                leftSection="R$"
+                                key={form.key('amount')}
+                                {...form.getInputProps('amount')}
+                            />
+
+                            <Select
+                                withAsterisk
+                                label="Projeto"
+                                placeholder="Selecione um projeto"
+                                data={projects}
+                                searchable
+                                key={form.key('project_id')}
+                                {...form.getInputProps('project_id')}
+                            />
+
+                            <Select
+                                withAsterisk
+                                label="Tipo de Doação"
+                                placeholder="Selecione o tipo"
+                                data={[
+                                    { value: 'help', label: 'Ajuda' },
+                                    { value: 'stop', label: 'Parar' }
+                                ]}
+                                key={form.key('donation_type')}
+                                {...form.getInputProps('donation_type')}
+                            />
+
+                            <Divider my="md" />
+
+                            {/* Dados Pessoais */}
+                            <Title order={3}>Dados Pessoais</Title>
+                            
+                            <TextInput
+                                withAsterisk
+                                label="Nome Completo"
+                                placeholder="Maria Santos"
+                                key={form.key('donor_name')}
+                                {...form.getInputProps('donor_name')}
+                            />
+
+                            <TextInput
+                                withAsterisk
+                                label="CPF"
+                                placeholder="000.000.000-00"
+                                key={form.key('cpf')}
+                                {...form.getInputProps('cpf')}
+                            />
+
+                            <TextInput
+                                withAsterisk
+                                label="Email"
+                                placeholder="maria@email.com"
+                                type="email"
+                                key={form.key('email')}
+                                {...form.getInputProps('email')}
+                            />
+
+                            <TextInput
+                                withAsterisk
+                                label="Telefone"
+                                placeholder="11999999999"
+                                key={form.key('cellphone')}
+                                {...form.getInputProps('cellphone')}
+                            />
+
+                            <Divider my="md" />
+
+                            {/* Endereço */}
+                            <Group gap="sm">
+                                <IconMapPin size={20} color="var(--mantine-color-blue-6)" />
+                                <Title order={3}>Endereço</Title>
+                            </Group>
+                            
+                            <Group grow>
+                                <TextInput
+                                    withAsterisk
+                                    label="CEP"
+                                    placeholder="00000-000"
+                                    key={form.key('postal_code')}
+                                    {...form.getInputProps('postal_code')}
+                                />
+                                <TextInput
+                                    withAsterisk
+                                    label="Estado"
+                                    placeholder="SP"
+                                    maxLength={2}
+                                    key={form.key('state')}
+                                    {...form.getInputProps('state')}
+                                />
+                            </Group>
+
+                            <TextInput
+                                withAsterisk
+                                label="Cidade"
+                                placeholder="São Paulo"
+                                key={form.key('city')}
+                                {...form.getInputProps('city')}
+                            />
+
+                            <Group grow>
+                                <TextInput
+                                    withAsterisk
+                                    label="Endereço"
+                                    placeholder="Rua das Flores"
+                                    key={form.key('address')}
+                                    {...form.getInputProps('address')}
+                                />
+                                <TextInput
+                                    withAsterisk
+                                    label="Número"
+                                    placeholder="123"
+                                    key={form.key('number')}
+                                    {...form.getInputProps('number')}
+                                />
+                            </Group>
+
+                            <Group grow>
+                                <TextInput
+                                    label="Complemento"
+                                    placeholder="Apto 45"
+                                    key={form.key('complement')}
+                                    {...form.getInputProps('complement')}
+                                />
+                                <TextInput
+                                    withAsterisk
+                                    label="Bairro"
+                                    placeholder="Centro"
+                                    key={form.key('neighborhood')}
+                                    {...form.getInputProps('neighborhood')}
+                                />
+                            </Group>
+
+                            <Group justify="flex-end" mt="md">
+                                <Button 
+                                    type="submit" 
+                                    loading={loading} 
+                                    disabled={loading}
+                                    leftSection={<IconHeart size={16} />}
+                                    size="md"
+                                >
+                                    {loading ? 'Gerando Boleto...' : 'Gerar Boleto'}
+                                </Button>
+                            </Group>
+                        </Stack>
+                    </form>
+                </Stack>
+            </Paper>
+        </Stack>
     );
 }

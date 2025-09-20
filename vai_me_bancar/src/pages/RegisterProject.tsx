@@ -1,5 +1,5 @@
 import {useForm} from "@mantine/form";
-import {Button, Group, Textarea, TextInput, Container, Title, Paper, Stack, Text, Alert} from "@mantine/core";
+import {Button, Group, Textarea, TextInput, Title, Paper, Stack, Text, Alert} from "@mantine/core";
 import { DateInput } from '@mantine/dates';
 import {IconPlus, IconInfoCircle, IconCheck} from "@tabler/icons-react";
 import {useState} from "react";
@@ -87,108 +87,106 @@ export default function RegisterProject() {
 
 
     return (
-        <Container size="sm" py="xl">
-            <Stack gap="lg">
-                <Paper radius="md" p="xl" withBorder>
-                    <Stack gap="lg">
-                        <Group gap="sm">
-                            <IconPlus size={32} color="var(--mantine-color-blue-6)" />
-                            <div>
-                                <Title order={1}>Criar Projeto</Title>
-                                <Text c="dimmed">Crie seu projeto e comece a receber doações!</Text>
-                            </div>
-                        </Group>
+        <Stack gap="lg">
+            <Paper radius="md" p="xl" withBorder>
+                <Stack gap="lg">
+                    <Group gap="sm">
+                        <IconPlus size={32} color="var(--mantine-color-blue-6)" />
+                        <div>
+                            <Title order={1}>Criar Projeto</Title>
+                            <Text c="dimmed">Crie seu projeto e comece a receber doações!</Text>
+                        </div>
+                    </Group>
 
-                        {success && (
-                            <Alert
-                                icon={<IconCheck size={16} />}
-                                title="Projeto Criado!"
-                                color="green"
-                                variant="light"
-                            >
-                                Seu projeto foi criado com sucesso e já está disponível para receber doações!
-                            </Alert>
-                        )}
-
+                    {success && (
                         <Alert
-                            icon={<IconInfoCircle size={16} />}
-                            title="Informações Importantes"
-                            color="blue"
+                            icon={<IconCheck size={16} />}
+                            title="Projeto Criado!"
+                            color="green"
                             variant="light"
                         >
-                            Após criar seu projeto, ele ficará disponível para receber doações. 
-                            Você poderá acompanhar o progresso e gerenciar as contribuições recebidas.
+                            Seu projeto foi criado com sucesso e já está disponível para receber doações!
                         </Alert>
+                    )}
 
-                        <form onSubmit={form.onSubmit(handleSubmit)}>
-                            <Stack gap="md">
-                                <TextInput
-                                    withAsterisk
-                                    label="Nome do Projeto"
-                                    placeholder="Chegar até a lua"
-                                    key={form.key('projectName')}
-                                    {...form.getInputProps('projectName')}
-                                />
+                    <Alert
+                        icon={<IconInfoCircle size={16} />}
+                        title="Informações Importantes"
+                        color="blue"
+                        variant="light"
+                    >
+                        Após criar seu projeto, ele ficará disponível para receber doações. 
+                        Você poderá acompanhar o progresso e gerenciar as contribuições recebidas.
+                    </Alert>
 
-                                <Textarea
-                                    withAsterisk
-                                    label="Descrição"
-                                    placeholder="Construir foguetes, bora que bora!"
-                                    minRows={3}
-                                    key={form.key('description')}
-                                    {...form.getInputProps('description')}
-                                />
+                    <form onSubmit={form.onSubmit(handleSubmit)}>
+                        <Stack gap="md">
+                            <TextInput
+                                withAsterisk
+                                label="Nome do Projeto"
+                                placeholder="Chegar até a lua"
+                                key={form.key('projectName')}
+                                {...form.getInputProps('projectName')}
+                            />
 
-                                <TextInput
-                                    withAsterisk
-                                    label="Nome do Responsável"
-                                    placeholder="Bianca Duarte"
-                                    key={form.key('ownerName')}
-                                    {...form.getInputProps('ownerName')}
-                                />
+                            <Textarea
+                                withAsterisk
+                                label="Descrição"
+                                placeholder="Construir foguetes, bora que bora!"
+                                minRows={3}
+                                key={form.key('description')}
+                                {...form.getInputProps('description')}
+                            />
 
-                                <DateInput
-                                    withAsterisk
-                                    valueFormat="DD/MM/YYYY"
-                                    label="Data de Início"
-                                    placeholder="Selecione a data"
-                                    key={form.key('startDate')}
-                                    {...form.getInputProps('startDate')}
-                                />
+                            <TextInput
+                                withAsterisk
+                                label="Nome do Responsável"
+                                placeholder="Bianca Duarte"
+                                key={form.key('ownerName')}
+                                {...form.getInputProps('ownerName')}
+                            />
 
-                                <DateInput
-                                    withAsterisk
-                                    valueFormat="DD/MM/YYYY"
-                                    label="Data de Término"
-                                    placeholder="Selecione a data"
-                                    key={form.key('endDate')}
-                                    {...form.getInputProps('endDate')}
-                                />
+                            <DateInput
+                                withAsterisk
+                                valueFormat="DD/MM/YYYY"
+                                label="Data de Início"
+                                placeholder="Selecione a data"
+                                key={form.key('startDate')}
+                                {...form.getInputProps('startDate')}
+                            />
 
-                                <TextInput
-                                    withAsterisk
-                                    label="Telefone"
-                                    placeholder="11999999999"
-                                    key={form.key('cellphone')}
-                                    {...form.getInputProps('cellphone')}
-                                />
+                            <DateInput
+                                withAsterisk
+                                valueFormat="DD/MM/YYYY"
+                                label="Data de Término"
+                                placeholder="Selecione a data"
+                                key={form.key('endDate')}
+                                {...form.getInputProps('endDate')}
+                            />
 
-                                <Group justify="flex-end" mt="md">
-                                    <Button 
-                                        type="submit" 
-                                        loading={loading} 
-                                        disabled={loading}
-                                        leftSection={<IconPlus size={16} />}
-                                        size="md"
-                                    >
-                                        {loading ? 'Criando...' : 'Criar Projeto'}
-                                    </Button>
-                                </Group>
-                            </Stack>
-                        </form>
-                    </Stack>
-                </Paper>
-            </Stack>
-        </Container>
+                            <TextInput
+                                withAsterisk
+                                label="Telefone"
+                                placeholder="11999999999"
+                                key={form.key('cellphone')}
+                                {...form.getInputProps('cellphone')}
+                            />
+
+                            <Group justify="flex-end" mt="md">
+                                <Button 
+                                    type="submit" 
+                                    loading={loading} 
+                                    disabled={loading}
+                                    leftSection={<IconPlus size={16} />}
+                                    size="md"
+                                >
+                                    {loading ? 'Criando...' : 'Criar Projeto'}
+                                </Button>
+                            </Group>
+                        </Stack>
+                    </form>
+                </Stack>
+            </Paper>
+        </Stack>
     );
 }

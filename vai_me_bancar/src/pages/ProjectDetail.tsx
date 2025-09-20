@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
-    Container,
     Title,
     Text,
     Card,
@@ -16,7 +15,8 @@ import {
     Center,
     Divider,
     Box,
-    Progress
+    Progress,
+    Modal
 } from '@mantine/core';
 import {
     IconArrowLeft,
@@ -27,7 +27,8 @@ import {
     IconCheck,
     IconClock,
     IconX,
-    IconAlertCircle
+    IconAlertCircle,
+    IconExternalLink
 } from '@tabler/icons-react';
 
 interface Project {
@@ -91,6 +92,8 @@ export default function ProjectDetail() {
     const [projectInfo, setProjectInfo] = useState<ProjectInfoResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [stopWinsModalOpen, setStopWinsModalOpen] = useState(false);
+    const [countdown, setCountdown] = useState(5);
 
     // Buscar dados do projeto e suas doações
     useEffect(() => {
@@ -113,7 +116,12 @@ export default function ProjectDetail() {
                 // Armazenar todas as informações
                 setProjectInfo(data);
                 setProject(data.project);
-                setDonations(data.project.donates);
+                setDonations(data.daily_ranking || []);
+
+                // Verificar se stop_wins é true e abrir modal
+                if (data.fundraising_stats.stop_wins) {
+                    setStopWinsModalOpen(true);
+                }
 
             } catch (error) {
                 console.error('Erro ao buscar dados do projeto:', error);
@@ -125,6 +133,29 @@ export default function ProjectDetail() {
 
         fetchProjectData();
     }, [projectId]);
+
+    // Timer para redirecionamento automático
+    useEffect(() => {
+        let timer: number;
+        
+        if (stopWinsModalOpen && countdown > 0) {
+            timer = setInterval(() => {
+                setCountdown((prev) => {
+                    if (prev <= 1) {
+                        handleYouTubeRedirect();
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        }
+
+        return () => {
+            if (timer) {
+                clearInterval(timer);
+            }
+        };
+    }, [stopWinsModalOpen, countdown]);
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('pt-BR', {
@@ -198,24 +229,33 @@ export default function ProjectDetail() {
         return Math.min((current / goal) * 100, 100);
     };
 
+    const handleYouTubeRedirect = () => {
+        window.open('https://www.youtube.com/watch?v=umDr0mPuyQc', '_blank');
+        setStopWinsModalOpen(false);
+        setCountdown(5);
+    };
+
+    const handleCloseModal = () => {
+        setStopWinsModalOpen(false);
+        setCountdown(5);
+    };
+
     // Função removida - as doações já têm status diretamente
 
     if (loading) {
         return (
-            <Container size="lg" py="xl">
-                <Center>
-                    <Stack align="center" gap="md">
-                        <Loader size="lg" />
-                        <Text>Carregando dados do projeto...</Text>
-                    </Stack>
-                </Center>
-            </Container>
+            <Center py="xl">
+                <Stack align="center" gap="md">
+                    <Loader size="lg" />
+                    <Text>Carregando dados do projeto...</Text>
+                </Stack>
+            </Center>
         );
     }
 
     if (error || !project) {
         return (
-            <Container size="lg" py="xl">
+            <Stack gap="md">
                 <Alert
                     icon={<IconAlertCircle size={16} />}
                     title="Erro"
@@ -224,12 +264,12 @@ export default function ProjectDetail() {
                 >
                     {error || 'Projeto não encontrado'}
                 </Alert>
-                <Group justify="center" mt="md">
+                <Group justify="center">
                     <Button component={Link} to="/" leftSection={<IconArrowLeft size={16} />}>
                         Voltar para Home
                     </Button>
                 </Group>
-            </Container>
+            </Stack>
         );
     }
 
@@ -238,26 +278,25 @@ export default function ProjectDetail() {
     const stopAmount = projectInfo ? projectInfo.fundraising_stats.stop_amount : 0;
 
     return (
-        <Container size="lg" py="xl">
-            <Stack gap="lg">
-                {/* Header */}
-                <Group justify="space-between">
-                    <Button
-                        component={Link}
-                        to="/"
-                        leftSection={<IconArrowLeft size={16} />}
-                        variant="light"
-                    >
-                        Voltar
-                    </Button>
-                    <Button
-                        component={Link}
-                        to="/register-donation"
-                        leftSection={<IconHeart size={16} />}
-                    >
-                        Fazer Doação
-                    </Button>
-                </Group>
+        <Stack gap="lg">
+            {/* Header */}
+            <Group justify="space-between">
+                <Button
+                    component={Link}
+                    to="/"
+                    leftSection={<IconArrowLeft size={16} />}
+                    variant="light"
+                >
+                    Voltar
+                </Button>
+                <Button
+                    component={Link}
+                    to="/register-donation"
+                    leftSection={<IconHeart size={16} />}
+                >
+                    Fazer Doação
+                </Button>
+            </Group>
 
                 {/* Informações do Projeto */}
                 <Paper radius="md" p="xl" withBorder>
@@ -555,7 +594,88 @@ export default function ProjectDetail() {
                         )}
                     </Stack>
                 </Paper>
-            </Stack>
-        </Container>
+
+            {/* Modal Stop Wins */}
+            <Modal
+                opened={stopWinsModalOpen}
+                onClose={handleCloseModal}
+                title={
+                    <Group gap="sm">
+                        <IconX size={24} color="var(--mantine-color-red-6)" />
+                        <Text size="xl" fw={700} c="red">PROJETO PARADO! 🛑</Text>
+                    </Group>
+                }
+                size="lg"
+                centered
+                closeOnClickOutside={false}
+                closeOnEscape={false}
+            >
+                <Stack gap="lg">
+                    <Paper radius="md" p="lg" bg="red.0" withBorder>
+                        <Stack gap="md" align="center">
+                            <Text size="xl" fw={700} c="red" ta="center">
+                                🎉 PARABÉNS! VOCÊ CONSEGUIU PARAR ESSE PROJETO! 🎉
+                            </Text>
+                            <Text size="lg" ta="center" c="dimmed">
+                                O projeto <strong>"{project?.name}"</strong> foi oficialmente 
+                                <strong> PARADO DE VEZ</strong> graças às suas doações "STOP"!
+                            </Text>
+                            <Text size="md" ta="center" c="dimmed">
+                                {projectInfo?.fundraising_stats.troll_message}
+                            </Text>
+                        </Stack>
+                    </Paper>
+
+                    <Alert
+                        icon={<IconAlertCircle size={20} />}
+                        title="Missão Cumprida!"
+                        color="red"
+                        variant="light"
+                    >
+                        <Text>
+                            O projeto não vai mais receber doações e foi oficialmente cancelado. 
+                            Você fez a diferença impedindo que algo questionável acontecesse!
+                        </Text>
+                    </Alert>
+
+                    {/* Contador Regressivo */}
+                    <Paper radius="md" p="md" bg="yellow.0" withBorder>
+                        <Stack gap="sm" align="center">
+                            <Text size="lg" fw={600} c="orange" ta="center">
+                                ⏰ Redirecionamento automático em:
+                            </Text>
+                            <Text size="2xl" fw={700} c="red" ta="center">
+                                {countdown} segundos
+                            </Text>
+                            <Text size="sm" c="dimmed" ta="center">
+                                Você será redirecionado para uma música de celebração!
+                            </Text>
+                        </Stack>
+                    </Paper>
+
+                    <Group justify="center" gap="md">
+                        <Button
+                            onClick={handleYouTubeRedirect}
+                            size="lg"
+                            color="red"
+                            leftSection={<IconExternalLink size={20} />}
+                        >
+                            🎵 Comemorar com uma Música! 🎵
+                        </Button>
+                        <Button
+                            onClick={handleCloseModal}
+                            variant="outline"
+                            size="lg"
+                        >
+                            Fechar
+                        </Button>
+                    </Group>
+
+                    <Text size="sm" c="dimmed" ta="center">
+                        Clique em "Comemorar" para ouvir uma música especial de celebração! 🎶
+                    </Text>
+                </Stack>
+            </Modal>
+        </Stack>
     );
 }

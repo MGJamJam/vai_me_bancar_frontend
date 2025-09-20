@@ -196,8 +196,7 @@ export default function Homepage() {
                 </Container>
             </Paper>
 
-            <Container size="lg">
-                {/* Como Funciona */}
+            {/* Como Funciona */}
                 <Box mb="xl">
                     <Title order={2} mb="lg" ta="center">Como Funciona</Title>
                     <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="lg">
@@ -442,7 +441,6 @@ export default function Homepage() {
                         </Stack>
                     </Center>
                 </Paper>
-            </Container>
         </Box>
     );
 }

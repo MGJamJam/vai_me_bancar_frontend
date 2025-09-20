@@ -38,11 +38,11 @@ export function Router() {
 function RootLayout() {
     return (
         <AppShell
-            padding="md"
+            padding={0}
             header={{height: 70}}
         >
             <AppShell.Header>
-                <Container size="lg" h="100%">
+                <Container size="xl" h="100%">
                     <Group justify="space-between" h="100%">
                         <Group gap="lg">
                             <Title order={3} c="blue">
@@ -76,12 +76,14 @@ function RootLayout() {
             </AppShell.Header>
             
             <AppShell.Main>
-                <Routes>
-                    <Route path="/register-project" element={<RegisterProject />} />
-                    <Route path="/register-donation" element={<RegisterDonation />} />
-                    <Route path="/project/:projectId" element={<ProjectDetail />} />
-                    <Route path="/" element={<Homepage />} />
-                </Routes>
+                <Container size="xl" py="md">
+                    <Routes>
+                        <Route path="/register-project" element={<RegisterProject />} />
+                        <Route path="/register-donation" element={<RegisterDonation />} />
+                        <Route path="/project/:projectId" element={<ProjectDetail />} />
+                        <Route path="/" element={<Homepage />} />
+                    </Routes>
+                </Container>
             </AppShell.Main>
         </AppShell>
     );
