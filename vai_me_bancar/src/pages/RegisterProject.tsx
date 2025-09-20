@@ -27,26 +27,42 @@ export default function RegisterProject() {
         const payload = {
             name: values.projectName,
             description: values.description,
-            budget: values.budget,
-            goal_amount: values.goalAmount,
-            start_date: values.startDate ? new Date(values.startDate).toISOString().split('T')[0] : null,
-            end_date: values.endDate ? new Date(values.endDate).toISOString().split('T')[0] : null,
             owner_name: values.ownerName,
             cellphone: values.cellphone,
+            budget: "1000.00", // Valor padrão temporário
+            goal_amount: "1000.00", // Valor padrão temporário
+            start_date: values.startDate ? new Date(values.startDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            end_date: values.endDate ? new Date(values.endDate).toISOString().split('T')[0] : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 dias no futuro
         };
 
+        console.log('Payload sendo enviado:', payload);
+
         try {
-            const response = await fetch('https://vaimebancar.codegus.com/api/projects', {
+            const response = await fetch('/api/projects', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
                 },
                 body: JSON.stringify(payload),
             });
 
-            // if (!response.ok) {
-            //     throw new Error(`Erro na requisição: ${response.status}`);
-            // }
+            console.log('Status da resposta:', response.status);
+            console.log('Headers da resposta:', response.headers);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Erro na resposta:', errorText);
+                throw new Error(`Erro na requisição: ${response.status} - ${errorText}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const responseText = await response.text();
+                console.error('Resposta não é JSON:', responseText);
+                throw new Error('A resposta não é um JSON válido');
+            }
 
             const data = await response.json();
             console.log('Projeto criado com sucesso:', data);
