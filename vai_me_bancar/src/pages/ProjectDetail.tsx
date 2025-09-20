@@ -113,7 +113,7 @@ export default function ProjectDetail() {
                 // Armazenar todas as informações
                 setProjectInfo(data);
                 setProject(data.project);
-                setDonations(data.daily_ranking);
+                setDonations(data.project.donates);
 
             } catch (error) {
                 console.error('Erro ao buscar dados do projeto:', error);

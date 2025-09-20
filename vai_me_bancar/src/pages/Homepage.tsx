@@ -18,7 +18,7 @@ import {
     Divider,
     Anchor
 } from '@mantine/core';
-import { IconHeart, IconSearch, IconPlus, IconTarget, IconUsers, IconCurrencyReal } from '@tabler/icons-react';
+import { IconHeart, IconSearch, IconPlus, IconTarget, IconUsers, IconCurrencyReal, IconX } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 
 interface Project {
@@ -166,8 +166,8 @@ export default function Homepage() {
                                 Vai Me Bancar
                             </Title>
                             <Text size="lg" ta="center" maw={600}>
-                                Conectamos pessoas que precisam de ajuda com aqueles que querem ajudar. 
-                                Faça parte dessa corrente do bem!
+                                A plataforma onde você pode ajudar projetos incríveis ou parar aqueles que não fazem sentido! 
+                                Escolha seu lado: contribua para o sucesso ou pare projetos questionáveis.
                             </Text>
                             <Group>
                                 <Button
@@ -208,7 +208,7 @@ export default function Homepage() {
                                 </ThemeIcon>
                                 <Title order={3} ta="center">1. Escolha um Projeto</Title>
                                 <Text ta="center" c="dimmed">
-                                    Navegue pelos projetos disponíveis e escolha aquele que mais te toca o coração.
+                                    Navegue pelos projetos disponíveis e escolha aquele que mais te interessa.
                                 </Text>
                             </Stack>
                         </Card>
@@ -218,9 +218,10 @@ export default function Homepage() {
                                 <ThemeIcon size={60} radius="xl" color="green" variant="light">
                                     <IconCurrencyReal size={30} />
                                 </ThemeIcon>
-                                <Title order={3} ta="center">2. Faça sua Doação</Title>
+                                <Title order={3} ta="center">2. Escolha seu Lado</Title>
                                 <Text ta="center" c="dimmed">
-                                    Contribua com qualquer valor. Cada centavo faz a diferença para alcançar a meta.
+                                    <strong>HELP:</strong> Ajude projetos que você acredita<br/>
+                                    <strong>STOP:</strong> Pare projetos questionáveis
                                 </Text>
                             </Stack>
                         </Card>
@@ -230,13 +231,79 @@ export default function Homepage() {
                                 <ThemeIcon size={60} radius="xl" color="orange" variant="light">
                                     <IconUsers size={30} />
                                 </ThemeIcon>
-                                <Title order={3} ta="center">3. Acompanhe o Impacto</Title>
+                                <Title order={3} ta="center">3. Veja o Resultado</Title>
                                 <Text ta="center" c="dimmed">
-                                    Veja como sua contribuição ajuda a transformar vidas e comunidades.
+                                    Acompanhe a batalha entre Help e Stop em tempo real!
                                 </Text>
                             </Stack>
                         </Card>
                     </SimpleGrid>
+                </Box>
+
+                <Divider my="xl" />
+
+                {/* Help vs Stop */}
+                <Box mb="xl">
+                    <Title order={2} mb="lg" ta="center">Help vs Stop</Title>
+                    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+                        <Card shadow="sm" padding="xl" radius="md" withBorder bg="green.0">
+                            <Stack align="center" gap="md">
+                                <ThemeIcon size={80} radius="xl" color="green" variant="filled">
+                                    <IconHeart size={40} />
+                                </ThemeIcon>
+                                <Title order={2} ta="center" c="green">HELP</Title>
+                                <Text ta="center" size="lg" fw={500}>
+                                    Ajude projetos que você acredita!
+                                </Text>
+                                <Text ta="center" c="dimmed">
+                                    Contribua para projetos que fazem sentido, que podem mudar vidas 
+                                    e fazer a diferença no mundo. Sua doação ajuda a alcançar metas 
+                                    importantes e realiza sonhos.
+                                </Text>
+                                <Group gap="sm" mt="md">
+                                    <Badge color="green" size="lg">Apoio</Badge>
+                                    <Badge color="green" size="lg">Sucesso</Badge>
+                                    <Badge color="green" size="lg">Impacto</Badge>
+                                </Group>
+                            </Stack>
+                        </Card>
+
+                        <Card shadow="sm" padding="xl" radius="md" withBorder bg="red.0">
+                            <Stack align="center" gap="md">
+                                <ThemeIcon size={80} radius="xl" color="red" variant="filled">
+                                    <IconX size={40} />
+                                </ThemeIcon>
+                                <Title order={2} ta="center" c="red">STOP</Title>
+                                <Text ta="center" size="lg" fw={500}>
+                                    Pare projetos questionáveis!
+                                </Text>
+                                <Text ta="center" c="dimmed">
+                                    Contribua para parar projetos que não fazem sentido, são 
+                                    questionáveis ou podem causar danos. Sua doação "Stop" 
+                                    ajuda a impedir que projetos ruins sejam realizados.
+                                </Text>
+                                <Group gap="sm" mt="md">
+                                    <Badge color="red" size="lg">Proteção</Badge>
+                                    <Badge color="red" size="lg">Prevenção</Badge>
+                                    <Badge color="red" size="lg">Controle</Badge>
+                                </Group>
+                            </Stack>
+                        </Card>
+                    </SimpleGrid>
+                    
+                    <Paper radius="md" p="lg" mt="lg" bg="blue.0">
+                        <Stack align="center" gap="md">
+                            <Title order={3} ta="center" c="blue">A Batalha em Tempo Real</Title>
+                            <Text ta="center" c="dimmed">
+                                Cada projeto tem uma batalha entre Help e Stop acontecendo em tempo real. 
+                                Veja qual lado está ganhando, acompanhe as estatísticas e participe da decisão!
+                            </Text>
+                            <Group gap="md">
+                                <Badge color="green" size="lg" variant="filled">Help Wins</Badge>
+                                <Badge color="red" size="lg" variant="filled">Stop Wins</Badge>
+                            </Group>
+                        </Stack>
+                    </Paper>
                 </Box>
 
                 <Divider my="xl" />
@@ -347,11 +414,11 @@ export default function Homepage() {
                     <Center>
                         <Stack align="center" gap="lg">
                             <Title order={2} ta="center">
-                                Pronto para Fazer a Diferença?
+                                Pronto para Escolher seu Lado?
                             </Title>
                             <Text size="lg" ta="center" c="dimmed" maw={500}>
-                                Junte-se a milhares de pessoas que já transformaram vidas através de doações.
-                                Cada contribuição conta!
+                                Junte-se à batalha entre Help e Stop! Contribua para projetos que você acredita 
+                                ou pare aqueles que não fazem sentido. Sua voz importa!
                             </Text>
                             <Group>
                                 <Button
@@ -360,7 +427,7 @@ export default function Homepage() {
                                     size="lg"
                                     leftSection={<IconHeart size={20} />}
                                 >
-                                    Fazer Doação Agora
+                                    Fazer Doação (Help/Stop)
                                 </Button>
                                 <Button
                                     component={Link}
