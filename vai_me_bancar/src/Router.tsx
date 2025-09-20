@@ -2,6 +2,7 @@ import {createBrowserRouter, Link, Route, RouterProvider, Routes} from 'react-ro
 import RegisterDonation from "./pages/RegisterDonation.tsx";
 import RegisterProject from "./pages/RegisterProject.tsx";
 import Homepage from "./pages/Homepage.tsx";
+import ProjectDetail from "./pages/ProjectDetail.tsx";
 import {Anchor, AppShell, Button, Container, Flex, Group, Title} from "@mantine/core";
 import {IconHeart, IconPlus} from "@tabler/icons-react";
 
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
             {
                 path: 'register-donation',
                 element: <RegisterDonation />,
+            },
+            {
+                path: 'project/:projectId',
+                element: <ProjectDetail />,
             },
         ],
     },
@@ -74,6 +79,7 @@ function RootLayout() {
                 <Routes>
                     <Route path="/register-project" element={<RegisterProject />} />
                     <Route path="/register-donation" element={<RegisterDonation />} />
+                    <Route path="/project/:projectId" element={<ProjectDetail />} />
                     <Route path="/" element={<Homepage />} />
                 </Routes>
             </AppShell.Main>

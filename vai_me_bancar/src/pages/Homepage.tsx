@@ -323,12 +323,12 @@ export default function Homepage() {
 
                                             <Button
                                                 component={Link}
-                                                to="/register-donation"
+                                                to={`/project/${project.id}`}
                                                 fullWidth
                                                 leftSection={<IconHeart size={16} />}
                                                 mt="md"
                                             >
-                                                Doar para este Projeto
+                                                Ver Detalhes
                                             </Button>
                                         </Stack>
                                     </Card>

@@ -54,6 +54,7 @@ export default function RegisterDonation() {
             donor_name: '',
             cellphone: '',
             project_id: '',
+            donation_type: '',
             // Campos de endereço para o boleto
             email: '',
             cpf: '',
@@ -71,6 +72,7 @@ export default function RegisterDonation() {
             donor_name: (value) => (!value ? 'Nome do doador é obrigatório' : null),
             cellphone: (value) => (!value ? 'Telefone é obrigatório' : null),
             project_id: (value) => (!value ? 'Projeto é obrigatório' : null),
+            donation_type: (value) => (!value ? 'Tipo de doação é obrigatório' : null),
             email: (value) => (!value ? 'Email é obrigatório' : (/^\S+@\S+$/.test(value) ? null : 'Email inválido')),
             cpf: (value) => (!value ? 'CPF é obrigatório' : null),
             postal_code: (value) => (!value ? 'CEP é obrigatório' : null),
@@ -104,6 +106,7 @@ export default function RegisterDonation() {
                 donor_city: values.city,
                 donor_state: values.state,
                 donor_zipcode: values.postal_code,
+                donation_type: values.donation_type,
                 description: `Doação para o projeto: ${projectName}`
             };
 
@@ -236,6 +239,18 @@ export default function RegisterDonation() {
                                     searchable
                                     key={form.key('project_id')}
                                     {...form.getInputProps('project_id')}
+                                />
+
+                                <Select
+                                    withAsterisk
+                                    label="Tipo de Doação"
+                                    placeholder="Selecione o tipo"
+                                    data={[
+                                        { value: 'help', label: 'Ajuda' },
+                                        { value: 'stop', label: 'Parar' }
+                                    ]}
+                                    key={form.key('donation_type')}
+                                    {...form.getInputProps('donation_type')}
                                 />
 
                                 <Divider my="md" />
