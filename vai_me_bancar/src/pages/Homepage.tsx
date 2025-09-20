@@ -25,12 +25,16 @@ interface Project {
     id: number;
     name: string;
     description: string;
-    owner_name: string;
-    goal_amount: number;
-    current_amount?: number;
+    budget: number;
+    current_amount: number;
     start_date: string;
     end_date: string;
+    owner_name: string;
+    cellphone: string;
+    category: string;
     status: string;
+    created_at: string;
+    updated_at: string;
 }
 
 export default function Homepage() {
@@ -58,7 +62,7 @@ export default function Homepage() {
                         name: "Construção de Escola Rural",
                         description: "Projeto para construir uma escola em comunidade rural carente",
                         owner_name: "Maria Silva",
-                        goal_amount: 50000,
+                        budget: 50000,
                         current_amount: 25000,
                         start_date: "2024-01-01",
                         end_date: "2024-12-31",
@@ -69,7 +73,7 @@ export default function Homepage() {
                         name: "Tratamento Médico",
                         description: "Custos para tratamento de câncer de uma criança",
                         owner_name: "João Santos",
-                        goal_amount: 30000,
+                        budget: 30000,
                         current_amount: 15000,
                         start_date: "2024-02-01",
                         end_date: "2024-08-31",
@@ -80,7 +84,7 @@ export default function Homepage() {
                         name: "Projeto Ambiental",
                         description: "Reflorestamento de área degradada",
                         owner_name: "Ana Costa",
-                        goal_amount: 20000,
+                        budget: 20000,
                         current_amount: 5000,
                         start_date: "2024-03-01",
                         end_date: "2024-11-30",
@@ -118,8 +122,8 @@ export default function Homepage() {
         }).format(amount);
     };
 
-    const calculateProgress = (current: number, goal: number) => {
-        return Math.min((current / goal) * 100, 100);
+    const calculateProgress = (current: number, budget: number) => {
+        return Math.min((current / budget) * 100, 100);
     };
 
     const getStatusColor = (status: string) => {
@@ -294,7 +298,7 @@ export default function Homepage() {
                                                         {formatCurrency(project.current_amount || 0)}
                                                     </Text>
                                                     <Text size="sm" c="dimmed">
-                                                        de {formatCurrency(project.goal_amount)}
+                                                        de {formatCurrency(project.budget)}
                                                     </Text>
                                                 </Group>
 
@@ -309,7 +313,7 @@ export default function Homepage() {
                                                     <Box
                                                         style={{
                                                             height: '100%',
-                                                            width: `${calculateProgress(project.current_amount || 0, project.goal_amount)}%`,
+                                                            width: `${calculateProgress(project.current_amount || 0, project.budget)}%`,
                                                             backgroundColor: '#51cf66',
                                                             transition: 'width 0.3s ease'
                                                         }}
@@ -317,7 +321,7 @@ export default function Homepage() {
                                                 </Box>
 
                                                 <Text size="xs" c="dimmed" ta="center">
-                                                    {calculateProgress(project.current_amount || 0, project.goal_amount).toFixed(1)}% concluído
+                                                    {calculateProgress(project.current_amount || 0, project.budget).toFixed(1)}% concluído
                                                 </Text>
                                             </Stack>
 

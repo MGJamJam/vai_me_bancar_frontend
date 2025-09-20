@@ -34,47 +34,40 @@ interface Project {
     id: number;
     name: string;
     description: string;
-    owner_name: string;
     budget: number;
-    current_amount?: number;
+    current_amount: number;
     start_date: string;
     end_date: string;
+    owner_name: string;
+    cellphone: string;
+    category: string;
     status: string;
+    created_at: string;
+    updated_at: string;
 }
 
 interface Donation {
     id: number;
     amount: number;
-    donor_name: string;
-    donor_email: string;
-    donor_cpf: string;
-    donor_phone: string;
-    donor_address: string;
-    donor_city: string;
-    donor_state: string;
-    donor_zipcode: string;
-    description: string;
+    status: string;
     project_id: number;
+    donor_name: string;
+    cellphone: string;
+    asaas_cliente_id: string;
+    asaas_cobranca_id: string;
     created_at: string;
     updated_at: string;
 }
 
-interface Payment {
-    id: number;
-    donation_id: number;
-    status: string;
-    boleto_url?: string;
-    due_date?: string;
-    paid_at?: string;
-    created_at: string;
-    updated_at: string;
+interface ProjectDonatesResponse {
+    project: Project;
+    donates: Donation[];
 }
 
 export default function ProjectDetail() {
     const { projectId } = useParams<{ projectId: string }>();
     const [project, setProject] = useState<Project | null>(null);
     const [donations, setDonations] = useState<Donation[]>([]);
-    const [payments, setPayments] = useState<Payment[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -98,31 +91,20 @@ export default function ProjectDetail() {
                 // Buscar doações do projeto
                 const donationsResponse = await fetch(`https://vaimebancar.codegus.com/api/projects/${projectId}/donates`);
                 if (donationsResponse.ok) {
-                    const donationsData = await donationsResponse.json();
-                    console.log('Donations data received:', donationsData);
-
-                    // Verificar se donationsData é um array
-                    const donationsArray = Array.isArray(donationsData.donates) ? donationsData.donates : [];
+                    const responseData: ProjectDonatesResponse = await donationsResponse.json();
+                    console.log('Project donates data received:', responseData);
+                    
+                    // Usar os dados do projeto da resposta (mais atualizados)
+                    if (responseData.project) {
+                        setProject(responseData.project);
+                    }
+                    
+                    // Usar as doações da resposta
+                    const donationsArray = Array.isArray(responseData.donates) ? responseData.donates : [];
                     setDonations(donationsArray);
 
-                    // Buscar status dos pagamentos para cada doação
-                    if (donationsArray.length > 0) {
-                        const paymentPromises = donationsArray.map(async (donation: Donation) => {
-                            try {
-                                const paymentResponse = await fetch(`https://vaimebancar.codegus.com/api/donates/${donation.id}/status`);
-                                if (paymentResponse.ok) {
-                                    const paymentData = await paymentResponse.json();
-                                    return paymentData;
-                                }
-                            } catch (error) {
-                                console.error(`Erro ao buscar status da doação ${donation.id}:`, error);
-                            }
-                            return null;
-                        });
-
-                        const paymentsData = (await Promise.all(paymentPromises)).filter(Boolean);
-                        setPayments(paymentsData);
-                    }
+                    // Como as doações já têm status, não precisamos buscar separadamente
+                    // Removido setPayments([]) pois não usamos mais payments
                 }
 
             } catch (error) {
@@ -208,9 +190,7 @@ export default function ProjectDetail() {
         return Math.min((current / goal) * 100, 100);
     };
 
-    const getPaymentForDonation = (donationId: number) => {
-        return payments.find(payment => payment.donation_id === donationId);
-    };
+    // Função removida - as doações já têm status diretamente
 
     if (loading) {
         return (
@@ -246,10 +226,6 @@ export default function ProjectDetail() {
     }
 
     const totalDonations = donations.reduce((sum, donation) => sum + donation.amount, 0);
-    const paidDonations = donations.filter(donation => {
-        const payment = getPaymentForDonation(donation.id);
-        return payment && (payment.status.toLowerCase() === 'paid' || payment.status.toLowerCase() === 'pago');
-    }).reduce((sum, donation) => sum + donation.amount, 0);
 
     return (
         <Container size="lg" py="xl">
@@ -368,8 +344,7 @@ export default function ProjectDetail() {
                         ) : (
                             <Stack gap="md">
                                 {donations.map((donation) => {
-                                    const payment = getPaymentForDonation(donation.id);
-                                    const status = payment ? payment.status : 'pending';
+                                    const status = donation.status;
 
                                     return (
                                         <Card key={donation.id} shadow="sm" padding="lg" radius="md" withBorder>
@@ -378,7 +353,7 @@ export default function ProjectDetail() {
                                                     <IconUser size={20} />
                                                     <div>
                                                         <Text fw={500}>{donation.donor_name}</Text>
-                                                        <Text size="sm" c="dimmed">{donation.donor_email}</Text>
+                                                        <Text size="sm" c="dimmed">{donation.cellphone}</Text>
                                                     </div>
                                                 </Group>
                                                 <Badge
@@ -409,20 +384,6 @@ export default function ProjectDetail() {
                                                     </Text>
                                                 </Grid.Col>
                                             </Grid>
-
-                                            {payment && payment.boleto_url && (
-                                                <Group mt="md">
-                                                    <Button
-                                                        component="a"
-                                                        href={payment.boleto_url}
-                                                        target="_blank"
-                                                        size="sm"
-                                                        variant="light"
-                                                    >
-                                                        Ver Boleto
-                                                    </Button>
-                                                </Group>
-                                            )}
                                         </Card>
                                     );
                                 })}
