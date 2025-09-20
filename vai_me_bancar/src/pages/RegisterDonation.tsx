@@ -1,14 +1,21 @@
 import {useForm} from "@mantine/form";
-import {Button, Group, NumberInput, Select, TextInput, Container, Title, Paper, Stack, Text, Alert} from "@mantine/core";
+import {Button, Group, NumberInput, Select, TextInput, Container, Title, Paper, Stack, Text, Alert, Divider} from "@mantine/core";
 import {useEffect, useState} from "react";
-import {IconHeart, IconInfoCircle, IconCheck} from "@tabler/icons-react";
+import {IconHeart, IconInfoCircle, IconCheck, IconDownload, IconMapPin} from "@tabler/icons-react";
 
 export default function RegisterDonation() {
 
 
     const [projects, setProjects] = useState<Array<{value: string, label: string}>>([]);
+    const [projectsData, setProjectsData] = useState<Array<{id: number, name: string}>>([]);
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [boletoData, setBoletoData] = useState<{
+        boletoUrl: string;
+        paymentId: string;
+        dueDate: string;
+        amount: number;
+    } | null>(null);
 
     // Buscar projetos disponíveis
     useEffect(() => {
@@ -22,6 +29,10 @@ export default function RegisterDonation() {
                         label: project.name
                     }));
                     setProjects(projectOptions);
+                    setProjectsData(data.map((project: any) => ({
+                        id: project.id,
+                        name: project.name
+                    })));
                 }
             } catch (error) {
                 console.error('Erro ao buscar projetos:', error);
@@ -42,7 +53,17 @@ export default function RegisterDonation() {
             amount: '',
             donor_name: '',
             cellphone: '',
-            project_id: ''
+            project_id: '',
+            // Campos de endereço para o boleto
+            email: '',
+            cpf: '',
+            postal_code: '',
+            address: '',
+            number: '',
+            complement: '',
+            neighborhood: '',
+            city: '',
+            state: ''
         },
 
         validate: {
@@ -50,6 +71,14 @@ export default function RegisterDonation() {
             donor_name: (value) => (!value ? 'Nome do doador é obrigatório' : null),
             cellphone: (value) => (!value ? 'Telefone é obrigatório' : null),
             project_id: (value) => (!value ? 'Projeto é obrigatório' : null),
+            email: (value) => (!value ? 'Email é obrigatório' : (/^\S+@\S+$/.test(value) ? null : 'Email inválido')),
+            cpf: (value) => (!value ? 'CPF é obrigatório' : null),
+            postal_code: (value) => (!value ? 'CEP é obrigatório' : null),
+            address: (value) => (!value ? 'Endereço é obrigatório' : null),
+            number: (value) => (!value ? 'Número é obrigatório' : null),
+            neighborhood: (value) => (!value ? 'Bairro é obrigatório' : null),
+            city: (value) => (!value ? 'Cidade é obrigatória' : null),
+            state: (value) => (!value ? 'Estado é obrigatório' : null),
         },
     });
 
@@ -60,20 +89,27 @@ export default function RegisterDonation() {
             // send data to backend
             console.log(JSON.stringify(values));
 
+            // Encontrar o nome do projeto selecionado
+            const selectedProject = projectsData.find(p => p.id === parseInt(values.project_id));
+            const projectName = selectedProject ? selectedProject.name : 'Projeto';
+
             const payload = {
                 amount: parseFloat(values.amount),
-                status: "pending", // Status padrão para nova doação
                 project_id: parseInt(values.project_id),
                 donor_name: values.donor_name,
-                cellphone: values.cellphone,
-                // Campos opcionais do Asaas serão preenchidos pelo backend
-                asaas_cliente_id: null,
-                asaas_cobranca_id: null
+                donor_email: values.email,
+                donor_cpf: values.cpf,
+                donor_phone: values.cellphone,
+                donor_address: `${values.address}, ${values.number}${values.complement ? ', ' + values.complement : ''}`,
+                donor_city: values.city,
+                donor_state: values.state,
+                donor_zipcode: values.postal_code,
+                description: `Doação para o projeto: ${projectName}`
             };
 
             console.log('Payload sendo enviado:', payload);
 
-            const response = await fetch('https://vaimebancar.codegus.com/api/donates', {
+            const response = await fetch('https://vaimebancar.codegus.com/api/donates/boleto', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -100,14 +136,22 @@ export default function RegisterDonation() {
             }
 
             const data = await response.json();
-            console.log('Doação criada com sucesso:', data);
+            console.log('Pagamento criado com sucesso:', data);
+            
+            // Armazenar dados do boleto
+            setBoletoData({
+                boletoUrl: data.boleto_url || data.boletoUrl,
+                paymentId: data.id || data.payment_id,
+                dueDate: data.due_date || data.dueDate,
+                amount: parseFloat(values.amount)
+            });
             
             // Limpar o formulário após sucesso
             form.reset();
             setSuccess(true);
         } catch (error) {
-            console.error('Erro ao enviar doação:', error);
-            alert('Erro ao registrar doação. Tente novamente.');
+            console.error('Erro ao enviar pagamento:', error);
+            alert('Erro ao gerar boleto. Tente novamente.');
         } finally {
             setLoading(false);
         }
@@ -127,14 +171,33 @@ export default function RegisterDonation() {
                             </div>
                         </Group>
 
-                        {success && (
+                        {success && boletoData && (
                             <Alert
                                 icon={<IconCheck size={16} />}
-                                title="Doação Registrada!"
+                                title="Boleto Gerado com Sucesso!"
                                 color="green"
                                 variant="light"
                             >
-                                Sua doação foi registrada com sucesso. Obrigado por fazer a diferença!
+                                <Stack gap="sm">
+                                    <Text>
+                                        Seu boleto foi gerado com sucesso! 
+                                        Valor: <strong>R$ {boletoData.amount.toFixed(2)}</strong>
+                                    </Text>
+                                    <Text size="sm" c="dimmed">
+                                        Vencimento: {new Date(boletoData.dueDate).toLocaleDateString('pt-BR')}
+                                    </Text>
+                                    <Button
+                                        component="a"
+                                        href={boletoData.boletoUrl}
+                                        target="_blank"
+                                        leftSection={<IconDownload size={16} />}
+                                        color="green"
+                                        variant="filled"
+                                        fullWidth
+                                    >
+                                        Baixar Boleto
+                                    </Button>
+                                </Stack>
                             </Alert>
                         )}
 
@@ -144,12 +207,15 @@ export default function RegisterDonation() {
                             color="blue"
                             variant="light"
                         >
-                            Após registrar sua doação, você receberá instruções para efetuar o pagamento.
-                            O valor será transferido para o projeto assim que o pagamento for confirmado.
+                            Após preencher os dados, será gerado um boleto bancário para pagamento.
+                            O valor será transferido para o projeto após a confirmação do pagamento.
                         </Alert>
 
                         <form onSubmit={form.onSubmit(handleSubmit)}>
                             <Stack gap="md">
+                                {/* Informações Básicas */}
+                                <Title order={3}>Informações da Doação</Title>
+                                
                                 <NumberInput
                                     withAsterisk
                                     label="Valor da Doação"
@@ -162,22 +228,6 @@ export default function RegisterDonation() {
                                     {...form.getInputProps('amount')}
                                 />
 
-                                <TextInput
-                                    withAsterisk
-                                    label="Nome do Doador"
-                                    placeholder="Maria Santos"
-                                    key={form.key('donor_name')}
-                                    {...form.getInputProps('donor_name')}
-                                />
-
-                                <TextInput
-                                    withAsterisk
-                                    label="Telefone"
-                                    placeholder="11999999999"
-                                    key={form.key('cellphone')}
-                                    {...form.getInputProps('cellphone')}
-                                />
-
                                 <Select
                                     withAsterisk
                                     label="Projeto"
@@ -188,6 +238,111 @@ export default function RegisterDonation() {
                                     {...form.getInputProps('project_id')}
                                 />
 
+                                <Divider my="md" />
+
+                                {/* Dados Pessoais */}
+                                <Title order={3}>Dados Pessoais</Title>
+                                
+                                <TextInput
+                                    withAsterisk
+                                    label="Nome Completo"
+                                    placeholder="Maria Santos"
+                                    key={form.key('donor_name')}
+                                    {...form.getInputProps('donor_name')}
+                                />
+
+                                <TextInput
+                                    withAsterisk
+                                    label="CPF"
+                                    placeholder="000.000.000-00"
+                                    key={form.key('cpf')}
+                                    {...form.getInputProps('cpf')}
+                                />
+
+                                <TextInput
+                                    withAsterisk
+                                    label="Email"
+                                    placeholder="maria@email.com"
+                                    type="email"
+                                    key={form.key('email')}
+                                    {...form.getInputProps('email')}
+                                />
+
+                                <TextInput
+                                    withAsterisk
+                                    label="Telefone"
+                                    placeholder="11999999999"
+                                    key={form.key('cellphone')}
+                                    {...form.getInputProps('cellphone')}
+                                />
+
+                                <Divider my="md" />
+
+                                {/* Endereço */}
+                                <Group gap="sm">
+                                    <IconMapPin size={20} color="var(--mantine-color-blue-6)" />
+                                    <Title order={3}>Endereço</Title>
+                                </Group>
+                                
+                                <Group grow>
+                                    <TextInput
+                                        withAsterisk
+                                        label="CEP"
+                                        placeholder="00000-000"
+                                        key={form.key('postal_code')}
+                                        {...form.getInputProps('postal_code')}
+                                    />
+                                    <TextInput
+                                        withAsterisk
+                                        label="Estado"
+                                        placeholder="SP"
+                                        maxLength={2}
+                                        key={form.key('state')}
+                                        {...form.getInputProps('state')}
+                                    />
+                                </Group>
+
+                                <TextInput
+                                    withAsterisk
+                                    label="Cidade"
+                                    placeholder="São Paulo"
+                                    key={form.key('city')}
+                                    {...form.getInputProps('city')}
+                                />
+
+                                <Group grow>
+                                    <TextInput
+                                        withAsterisk
+                                        label="Endereço"
+                                        placeholder="Rua das Flores"
+                                        key={form.key('address')}
+                                        {...form.getInputProps('address')}
+                                    />
+                                    <TextInput
+                                        withAsterisk
+                                        label="Número"
+                                        placeholder="123"
+                                        key={form.key('number')}
+                                        {...form.getInputProps('number')}
+                                    />
+                                </Group>
+
+                                <Group grow>
+                                    <TextInput
+                                        label="Complemento"
+                                        placeholder="Apto 45"
+                                        key={form.key('complement')}
+                                        {...form.getInputProps('complement')}
+                                    />
+                                    <TextInput
+                                        withAsterisk
+                                        label="Bairro"
+                                        placeholder="Centro"
+                                        key={form.key('neighborhood')}
+                                        {...form.getInputProps('neighborhood')}
+                                    />
+                                </Group>
+
                                 <Group justify="flex-end" mt="md">
                                     <Button 
                                         type="submit" 
@@ -196,7 +351,7 @@ export default function RegisterDonation() {
                                         leftSection={<IconHeart size={16} />}
                                         size="md"
                                     >
-                                        {loading ? 'Enviando...' : 'Enviar Doação'}
+                                        {loading ? 'Gerando Boleto...' : 'Gerar Boleto'}
                                     </Button>
                                 </Group>
                             </Stack>
