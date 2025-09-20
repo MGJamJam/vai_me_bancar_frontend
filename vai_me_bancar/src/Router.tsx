@@ -1,7 +1,9 @@
 import {createBrowserRouter, Link, Route, RouterProvider, Routes} from 'react-router-dom';
 import RegisterDonation from "./pages/RegisterDonation.tsx";
 import RegisterProject from "./pages/RegisterProject.tsx";
-import {Anchor, AppShell, Button, Container, Flex} from "@mantine/core";
+import Homepage from "./pages/Homepage.tsx";
+import {Anchor, AppShell, Button, Container, Flex, Group, Title} from "@mantine/core";
+import {IconHeart, IconPlus} from "@tabler/icons-react";
 
 const router = createBrowserRouter([
     {
@@ -10,7 +12,7 @@ const router = createBrowserRouter([
         children: [
             {
                 index: true, // This is the default route for '/'
-                element: <div>Start</div>,
+                element: <Homepage />,
             },
             {
                 path: 'register-project',
@@ -31,29 +33,50 @@ export function Router() {
 function RootLayout() {
     return (
         <AppShell
-                padding="md"
-                header={{height: 40}}
-            >
-                <AppShell.Header>
-                    <Flex gap="md"
-                          justify="flex-start"
-                          align="center"
-                          direction="row"
-                          ml={"lg"}
-                    h={"100%"}>
-                    <Anchor href="/register-project">Registrar Projeto</Anchor>
-                    <Anchor href="/register-donation">Registrar Doação</Anchor>
-                    </Flex>
-                </AppShell.Header>
-                <AppShell.Main>
-                <Container size="sm">
-                    <Routes>
-                        <Route path="/register-project" element={<RegisterProject />} />
-                        <Route path="/register-donation" element={<RegisterDonation />} />
-                        <Route path="/" element={<div>Bem-vindo ao projeto de vaquinha!</div>} />
-                    </Routes>
+            padding="md"
+            header={{height: 70}}
+        >
+            <AppShell.Header>
+                <Container size="lg" h="100%">
+                    <Group justify="space-between" h="100%">
+                        <Group gap="lg">
+                            <Title order={3} c="blue">
+                                <Anchor href="/" underline="never">
+                                    Vai Me Bancar
+                                </Anchor>
+                            </Title>
+                        </Group>
+                        
+                        <Group gap="md">
+                            <Button
+                                component={Link}
+                                to="/register-donation"
+                                leftSection={<IconHeart size={16} />}
+                                variant="light"
+                                size="sm"
+                            >
+                                Fazer Doação
+                            </Button>
+                            <Button
+                                component={Link}
+                                to="/register-project"
+                                leftSection={<IconPlus size={16} />}
+                                size="sm"
+                            >
+                                Criar Projeto
+                            </Button>
+                        </Group>
+                    </Group>
                 </Container>
-                </AppShell.Main>
-            </AppShell>
+            </AppShell.Header>
+            
+            <AppShell.Main>
+                <Routes>
+                    <Route path="/register-project" element={<RegisterProject />} />
+                    <Route path="/register-donation" element={<RegisterDonation />} />
+                    <Route path="/" element={<Homepage />} />
+                </Routes>
+            </AppShell.Main>
+        </AppShell>
     );
 }

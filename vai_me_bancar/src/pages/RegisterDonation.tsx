@@ -1,10 +1,14 @@
 import {useForm} from "@mantine/form";
-import {Button, Group, NumberInput, Select, TextInput} from "@mantine/core";
+import {Button, Group, NumberInput, Select, TextInput, Container, Title, Paper, Stack, Text, Alert} from "@mantine/core";
 import {useEffect, useState} from "react";
+import {IconHeart, IconInfoCircle, IconCheck} from "@tabler/icons-react";
 
 export default function RegisterDonation() {
+
+
     const [projects, setProjects] = useState<Array<{value: string, label: string}>>([]);
     const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState(false);
 
     // Buscar projetos disponíveis
     useEffect(() => {
@@ -51,7 +55,7 @@ export default function RegisterDonation() {
 
     const handleSubmit = async (values: typeof form.values) => {
         setLoading(true);
-
+        
         try {
             // send data to backend
             console.log(JSON.stringify(values));
@@ -97,10 +101,10 @@ export default function RegisterDonation() {
 
             const data = await response.json();
             console.log('Doação criada com sucesso:', data);
-
+            
             // Limpar o formulário após sucesso
             form.reset();
-            alert('Doação registrada com sucesso!');
+            setSuccess(true);
         } catch (error) {
             console.error('Erro ao enviar doação:', error);
             alert('Erro ao registrar doação. Tente novamente.');
@@ -111,49 +115,95 @@ export default function RegisterDonation() {
 
 
     return (
-        <form onSubmit={form.onSubmit(handleSubmit)}>
-            <NumberInput
-                withAsterisk
-                label="Valor da Doação"
-                placeholder="100.00"
-                min={0.01}
-                step={0.01}
-                decimalScale={2}
-                key={form.key('amount')}
-                {...form.getInputProps('amount')}
-            />
+        <Container size="sm" py="xl">
+            <Stack gap="lg">
+                <Paper radius="md" p="xl" withBorder>
+                    <Stack gap="lg">
+                        <Group gap="sm">
+                            <IconHeart size={32} color="var(--mantine-color-red-6)" />
+                            <div>
+                                <Title order={1}>Fazer Doação</Title>
+                                <Text c="dimmed">Contribua para um projeto e faça a diferença!</Text>
+                            </div>
+                        </Group>
 
-            <TextInput
-                withAsterisk
-                label="Nome do Doador"
-                placeholder="Maria Santos"
-                key={form.key('donor_name')}
-                {...form.getInputProps('donor_name')}
-            />
+                        {success && (
+                            <Alert
+                                icon={<IconCheck size={16} />}
+                                title="Doação Registrada!"
+                                color="green"
+                                variant="light"
+                            >
+                                Sua doação foi registrada com sucesso. Obrigado por fazer a diferença!
+                            </Alert>
+                        )}
 
-            <TextInput
-                withAsterisk
-                label="Telefone"
-                placeholder="11999999999"
-                key={form.key('cellphone')}
-                {...form.getInputProps('cellphone')}
-            />
+                        <Alert
+                            icon={<IconInfoCircle size={16} />}
+                            title="Informações Importantes"
+                            color="blue"
+                            variant="light"
+                        >
+                            Após registrar sua doação, você receberá instruções para efetuar o pagamento.
+                            O valor será transferido para o projeto assim que o pagamento for confirmado.
+                        </Alert>
 
-            <Select
-                withAsterisk
-                label="Projeto"
-                placeholder="Selecione um projeto"
-                data={projects}
-                searchable
-                key={form.key('project_id')}
-                {...form.getInputProps('project_id')}
-            />
+                        <form onSubmit={form.onSubmit(handleSubmit)}>
+                            <Stack gap="md">
+                                <NumberInput
+                                    withAsterisk
+                                    label="Valor da Doação"
+                                    placeholder="100.00"
+                                    min={0.01}
+                                    step={0.01}
+                                    decimalScale={2}
+                                    leftSection="R$"
+                                    key={form.key('amount')}
+                                    {...form.getInputProps('amount')}
+                                />
 
-            <Group justify="flex-end" mt="md">
-                <Button type="submit" loading={loading} disabled={loading}>
-                    {loading ? 'Enviando...' : 'Enviar Doação'}
-                </Button>
-            </Group>
-        </form>
+                                <TextInput
+                                    withAsterisk
+                                    label="Nome do Doador"
+                                    placeholder="Maria Santos"
+                                    key={form.key('donor_name')}
+                                    {...form.getInputProps('donor_name')}
+                                />
+
+                                <TextInput
+                                    withAsterisk
+                                    label="Telefone"
+                                    placeholder="11999999999"
+                                    key={form.key('cellphone')}
+                                    {...form.getInputProps('cellphone')}
+                                />
+
+                                <Select
+                                    withAsterisk
+                                    label="Projeto"
+                                    placeholder="Selecione um projeto"
+                                    data={projects}
+                                    searchable
+                                    key={form.key('project_id')}
+                                    {...form.getInputProps('project_id')}
+                                />
+
+                                <Group justify="flex-end" mt="md">
+                                    <Button 
+                                        type="submit" 
+                                        loading={loading} 
+                                        disabled={loading}
+                                        leftSection={<IconHeart size={16} />}
+                                        size="md"
+                                    >
+                                        {loading ? 'Enviando...' : 'Enviar Doação'}
+                                    </Button>
+                                </Group>
+                            </Stack>
+                        </form>
+                    </Stack>
+                </Paper>
+            </Stack>
+        </Container>
     );
 }
